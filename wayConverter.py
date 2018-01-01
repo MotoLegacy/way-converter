@@ -1,15 +1,51 @@
 # Simple Python script to convert the NZ:P Demo waypoints to the NZ:P Reboot format
-# Script created by Ian Bowling aka MotoLegacy
+# Script created by Ian Bowling, GUI designed by Elias Moreno
 import sys
-
 if sys.version_info >= (3, 0):
-	originalFile = input("Name of waypoint file: ")
-else:
-	originalFile = raw_input("Name of waypoint file: ")
+	import Tkinter as tk
+if sys.version_info < (3, 0):
+	import tkinter as tk
+import tkFileDialog as tkfd
 
-#Remove the extension from the file if it exists (to create fixed name)
-if ".way" in originalFile:
-	originalFile = originalFile.split('.', 1)[0]
+originalFile = None
+
+#GUI Window root
+root = tk.Tk()
+root.title("Waypoint Converter")
+root.minsize(325,200)
+
+# GUI Status display initial values
+stat1 = tk.StringVar()
+stat1.set("")
+stat2 = tk.StringVar()
+stat2.set("Ready!")
+
+# Summon conversion process from button click event
+def summonconvert():
+	global originalFile
+	global statstr
+	originalFile = box.get()
+	#Remove the extension from the file if it exists (to create fixed name)
+	if ".way" in originalFile:
+		originalFile = originalFile.split('.', 1)[0]
+
+	#First check if we actually have the file
+	try:
+		h = open(originalFile+".way")
+	except IOError:
+		stat1.set("ERROR: "+originalFile+".way does not seem to exist!")
+		stat2.set("Try again with a valid .way file.")
+
+	#Search for how many waypoints are in the file
+	f = open(originalFile+".way")
+	contents = f.read()
+	f.close()
+	number = contents.count("Waypoint")
+	stat1.set("Found " + str(number) + " waypoints.")
+
+	convert(number, 0)
+
+	stat2.set("Finished!")
 
 def convert(way, lnum):
 	origin = wayid = ""
@@ -101,21 +137,46 @@ def convert(way, lnum):
 		if way != 0:
 			convert(way, lnum+15)
 
-#First check if we actually have the file
-try: 
-	h = open(originalFile+".way")
-except IOError:
-	print("ERROR: "+originalFile+".way does not seem to exist!")
-	quit()
+mainframe = tk.Frame(root)
 
+#GUI Label
+textframe = tk.Frame(mainframe, bd=10)
+text = tk.Label(textframe, text="Choose a waypoint file:")
+text.pack(side=tk.LEFT)
+textframe.pack(side=tk.TOP, fill=tk.X)
 
-#Search for how many waypoints are in the file
-f = open(originalFile+".way")
-contents = f.read()
-f.close()
-number = contents.count("Waypoint")
-print ("Found " + str(number) + " waypoints")
+#GUI File selection
+entryframe = tk.Frame(mainframe)
+boxframe = tk.Frame(entryframe, bd=10)
+box = tk.Entry(boxframe)
+box.pack(fill=tk.X)
 
-convert(number, 0)
+#Command for the file selection button
+def openfile():
+	file = tkfd.askopenfilename(title="Select file", filetypes=(("Waypoint files", "*.way"), ("All files", "*.*")))
+	box.delete(0, tk.END)
+	box.insert(tk.END, file)
+buttframe = tk.Frame(entryframe, bd=10)
+button = tk.Button(buttframe, text="...", command=openfile)
+button.pack(side=tk.BOTTOM)
+boxframe.pack(side=tk.LEFT, fill=tk.X, expand=1)
+buttframe.pack(side=tk.RIGHT)
+entryframe.pack(side=tk.TOP, fill=tk.X)
 
-print("Finished!")
+#GUI start button
+triggerframe = tk.Frame(mainframe, bd=10)
+trigger = tk.Button(triggerframe, text="Convert!", command=summonconvert)
+trigger.pack(side=tk.RIGHT)
+triggerframe.pack(side=tk.TOP, fill=tk.X)
+
+#GUI Status Label
+statusframe = tk.Frame(mainframe, bd=10)
+status1 = tk.Label(statusframe, textvariable=stat1)
+status1.pack(anchor=tk.NW)
+status2 = tk.Label(statusframe, textvariable=stat2)
+status2.pack(anchor=tk.SW)
+statusframe.pack(side=tk.TOP, fill=tk.X)
+
+#GUI Main frame packing and tk loop
+mainframe.pack(fill=tk.BOTH, expand=1)
+root.mainloop()
