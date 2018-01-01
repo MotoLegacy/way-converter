@@ -1,10 +1,6 @@
-# Simple Python script to convert the NZ:P Demo waypoints to the NZ:P Reboot format
+# Simple Python 2.X script to convert the NZ:P Demo waypoints to the NZ:P Reboot format
 # Script created by Ian Bowling, GUI designed by Elias Moreno
-import sys
-if sys.version_info >= (3, 0):
-	import Tkinter as tk
-if sys.version_info < (3, 0):
-	import tkinter as tk
+import Tkinter as tk
 import tkFileDialog as tkfd
 
 originalFile = None
