@@ -1,7 +1,12 @@
-# Simple Python 2 script to convert the NZ:P Demo waypoints to the NZ:P Reboot format
+# Simple Python script to convert the NZ:P Demo waypoints to the NZ:P Reboot format
 # Script created by Ian Bowling aka MotoLegacy
+import sys
 
-originalFile = raw_input("Name of waypoint file: ")
+if sys.version_info >= (3, 0):
+	originalFile = input("Name of waypoint file: ")
+else:
+	originalFile = raw_input("Name of waypoint file: ")
+
 #Remove the extension from the file if it exists (to create fixed name)
 if ".way" in originalFile:
 	originalFile = originalFile.split('.', 1)[0]
@@ -95,6 +100,14 @@ def convert(way, lnum):
 		way -= 1
 		if way != 0:
 			convert(way, lnum+15)
+
+#First check if we actually have the file
+try: 
+	h = open(originalFile+".way")
+except IOError:
+	print("ERROR: "+originalFile+".way does not seem to exist!")
+	quit()
+
 
 #Search for how many waypoints are in the file
 f = open(originalFile+".way")
